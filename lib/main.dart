@@ -29,8 +29,8 @@ class DataService {
   }
 
   void PropNacoes() {
-    chaves = ["name", "moeda", "habitantes"];
-    colunas = ["Nome", "Moeda", "Habitantes"];
+    chaves = ["nationality", "language", "capital"];
+    colunas = ["Nacionalidade", "Idioma", "Capital"];
   }
 
   Future<void> carregarCafe() async {
@@ -73,13 +73,24 @@ class DataService {
     tableStateNotifier.value = beersJson;
   }
 
-  void carregarNacoes() {
+  Future<void> carregarNacoes() async {
     PropNacoes();
-    tableStateNotifier.value = [
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"},
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"},
-      {"name": "Brasil", "moeda": "Real", "habitantes": "207kk"}
-    ];
+
+    var nationUri = Uri(
+        scheme: 'https',
+        host: 'random-data-api.com',
+        path: 'api/nation/random_nation',
+        queryParameters: {'size': '5'});
+
+    print('carregarNacoes #1 - antes do await');
+
+    var jsonString = await http.read(nationUri);
+
+    print('carregarNacoes #2 - depois do await');
+
+    var nationJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = nationJson;
   }
 }
 
