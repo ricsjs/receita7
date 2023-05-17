@@ -1,12 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 
 class DataService {
   final ValueNotifier<List> tableStateNotifier = new ValueNotifier([]);
-  var chaves = ["name", "style", "ibu"];
+  var chaves = ["chave", "chave", "chave"];
   var colunas = ["Coluna", "Coluna", "Coluna"];
 
   void carregar(index) {
@@ -19,39 +18,19 @@ class DataService {
     funcoes[index]();
   }
 
+  void PropCafe() {
+    chaves = ["blend_name", "origin", "intensifier"];
+    colunas = ["Nome", "Nacionalidade", "Intensidade"];
+  }
+
   void PropCerveja() {
     chaves = ["name", "style", "ibu"];
     colunas = ["Nome", "Estilo", "IBU"];
   }
 
-  void PropCafe() {
-    chaves = ["name", "intensidade", "nacionalidade"];
-    colunas = ["Nome", "Intensidade", "Nacionalidade"];
-  }
-
   void PropNacoes() {
     chaves = ["name", "moeda", "habitantes"];
     colunas = ["Nome", "Moeda", "Habitantes"];
-  }
-
-  Future<void> carregarCervejas() async {
-    PropCerveja();
-
-    var beersUri = Uri(
-        scheme: 'https',
-        host: 'random-data-api.com',
-        path: 'api/beer/random_beer',
-        queryParameters: {'size': '5'});
-
-    print('carregarCervejas #1 - antes do await');
-
-    var jsonString = await http.read(beersUri);
-
-    print('carregarCervejas #2 - depois do await');
-
-    var beersJson = jsonDecode(jsonString);
-
-    tableStateNotifier.value = beersJson;
   }
 
   Future<void> carregarCafe() async {
@@ -72,6 +51,26 @@ class DataService {
     var coffeeJson = jsonDecode(jsonString);
 
     tableStateNotifier.value = coffeeJson;
+  }
+
+  Future<void> carregarCervejas() async {
+    PropCerveja();
+
+    var beersUri = Uri(
+        scheme: 'https',
+        host: 'random-data-api.com',
+        path: 'api/beer/random_beer',
+        queryParameters: {'size': '5'});
+
+    print('carregarCervejas #1 - antes do await');
+
+    var jsonString = await http.read(beersUri);
+
+    print('carregarCervejas #2 - depois do await');
+
+    var beersJson = jsonDecode(jsonString);
+
+    tableStateNotifier.value = beersJson;
   }
 
   void carregarNacoes() {
@@ -160,19 +159,35 @@ class DataTableWidget extends StatelessWidget {
       this.propertyNames = const ["name", "style", "ibu"]});
 
   @override
+  @override
   Widget build(BuildContext context) {
     return DataTable(
-        columns: columnNames
-            .map((name) => DataColumn(
-                label: Expanded(
-                    child: Text(name,
-                        style: TextStyle(fontStyle: FontStyle.italic)))))
-            .toList(),
-        rows: jsonObjects
-            .map((obj) => DataRow(
-                cells: propertyNames
-                    .map((propName) => DataCell(Text(obj[propName])))
-                    .toList()))
-            .toList());
+      columns: columnNames
+          .map(
+            (name) => DataColumn(
+              label: Expanded(
+                child: Text(
+                  name,
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+          )
+          .toList(),
+      rows: jsonObjects
+          .map(
+            (obj) => DataRow(
+              cells: propertyNames
+                  .map(
+                    (propName) => DataCell(
+                      Text(obj[propName] ??
+                          'Conteúdo vazio'), // Verificar e fornecer valor padrão para propriedades nulas
+                    ),
+                  )
+                  .toList(),
+            ),
+          )
+          .toList(),
+    );
   }
 }
